@@ -1,0 +1,187 @@
+{
+  "nbformat": 4,
+  "nbformat_minor": 0,
+  "metadata": {
+    "colab": {
+      "provenance": [],
+      "authorship_tag": "ABX9TyPAONIxupyR0Z8zoR7vVJN7",
+      "include_colab_link": true
+    },
+    "kernelspec": {
+      "name": "python3",
+      "display_name": "Python 3"
+    },
+    "language_info": {
+      "name": "python"
+    }
+  },
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "view-in-github",
+        "colab_type": "text"
+      },
+      "source": [
+        "<a href=\"https://colab.research.google.com/github/AparnaR06/Job-Crisis-dashboard---DEV/blob/main/Job_Crisis_Dashboard\" target=\"_parent\"><img src=\"https://colab.research.google.com/assets/colab-badge.svg\" alt=\"Open In Colab\"/></a>"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": 1,
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "YyZ3NP1VsV0p",
+        "outputId": "79181474-61f2-4196-ec04-af990f5d60d6"
+      },
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "\u001b[2K     \u001b[90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\u001b[0m \u001b[32m44.3/44.3 kB\u001b[0m \u001b[31m2.9 MB/s\u001b[0m eta \u001b[36m0:00:00\u001b[0m\n",
+            "\u001b[2K   \u001b[90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\u001b[0m \u001b[32m9.9/9.9 MB\u001b[0m \u001b[31m51.4 MB/s\u001b[0m eta \u001b[36m0:00:00\u001b[0m\n",
+            "\u001b[2K   \u001b[90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\u001b[0m \u001b[32m6.9/6.9 MB\u001b[0m \u001b[31m53.9 MB/s\u001b[0m eta \u001b[36m0:00:00\u001b[0m\n",
+            "\u001b[2K   \u001b[90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\u001b[0m \u001b[32m79.1/79.1 kB\u001b[0m \u001b[31m3.8 MB/s\u001b[0m eta \u001b[36m0:00:00\u001b[0m\n",
+            "Authtoken saved to configuration file: /root/.config/ngrok/ngrok.yml\n"
+          ]
+        }
+      ],
+      "source": [
+        "# Install required libraries\n",
+        "!pip install streamlit pyngrok --quiet\n",
+        "\n",
+        "# Set ngrok authtoken\n",
+        "!ngrok config add-authtoken 30lSM0NPIacLfbhzn5V8hL844YE_3UgTaMPGYRE9W63KfMtf"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "%%writefile app.py\n",
+        "import streamlit as st\n",
+        "import pandas as pd\n",
+        "import matplotlib.pyplot as plt\n",
+        "import seaborn as sns\n",
+        "import numpy as np\n",
+        "\n",
+        "# Custom CSS for background and font\n",
+        "st.markdown(\"\"\"\n",
+        "    <style>\n",
+        "        .main {\n",
+        "            background-color: #0f1117;\n",
+        "            color: white;\n",
+        "        }\n",
+        "        .reportview-container .markdown-text-container {\n",
+        "            font-family: 'Segoe UI', sans-serif;\n",
+        "        }\n",
+        "        .stSlider > div > div > div {\n",
+        "            background-color: #ff4b4b;\n",
+        "        }\n",
+        "    </style>\n",
+        "\"\"\", unsafe_allow_html=True)\n",
+        "\n",
+        "st.set_page_config(page_title=\"Employment Dashboard\", layout=\"wide\")\n",
+        "st.title(\"📊 Employment Trend Dashboard\")\n",
+        "st.markdown(\"Explore the employment distribution across various sectors 📈\")\n",
+        "\n",
+        "# Sidebar Filters\n",
+        "with st.sidebar:\n",
+        "    st.markdown(\"### 📁 Filter Options\")\n",
+        "    year = st.slider(\"📅 Select Year\", 2010, 2025, 2018)\n",
+        "    sector = st.selectbox(\"🏭 Select Sector\", [\"Education\", \"IT\", \"Healthcare\", \"Manufacturing\"])\n",
+        "    show_line = st.checkbox(\"📈 Show Line Chart\")\n",
+        "\n",
+        "# Simulate dummy data\n",
+        "np.random.seed(0)\n",
+        "roles = [\"Analyst\", \"Consultant\", \"Engineer\", \"Manager\", \"Technician\"]\n",
+        "data = pd.DataFrame({\n",
+        "    \"Role\": roles,\n",
+        "    \"Employment\": np.random.randint(200, 1000, size=len(roles))\n",
+        "})\n",
+        "\n",
+        "# Show metrics\n",
+        "st.subheader(f\"📌 Employment Metrics - {sector} ({year})\")\n",
+        "cols = st.columns(len(roles))\n",
+        "for i, role in enumerate(roles):\n",
+        "    with cols[i]:\n",
+        "        st.metric(label=role, value=f\"{data['Employment'][i]}\", delta=f\"{np.random.randint(-100,100)}\")\n",
+        "\n",
+        "# Chart Area\n",
+        "st.subheader(f\"📊 Employment Data for {sector} - {year}\")\n",
+        "fig, ax = plt.subplots()\n",
+        "sns.set_style(\"darkgrid\")\n",
+        "\n",
+        "if show_line:\n",
+        "    sns.lineplot(data=data, x=\"Role\", y=\"Employment\", marker=\"o\", linewidth=2.5, color=\"cyan\", ax=ax)\n",
+        "else:\n",
+        "    sns.barplot(data=data, x=\"Role\", y=\"Employment\", palette=\"cool\", ax=ax)\n",
+        "\n",
+        "st.pyplot(fig)\n",
+        "\n",
+        "# Download CSV\n",
+        "csv = data.to_csv(index=False).encode()\n",
+        "st.download_button(\"📥 Download Data as CSV\", csv, \"employment_data.csv\", \"text/csv\", key='download-csv')\n"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "f6ZZ4giSshSQ",
+        "outputId": "3ca32f25-35d2-40fc-931a-fc94b0c7f86e"
+      },
+      "execution_count": 10,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Overwriting app.py\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "from pyngrok import ngrok\n",
+        "import threading\n",
+        "import time\n",
+        "import os\n",
+        "\n",
+        "# Kill existing tunnels\n",
+        "ngrok.kill()\n",
+        "\n",
+        "# Launch streamlit app\n",
+        "def run():\n",
+        "    os.system(\"streamlit run app.py\")\n",
+        "\n",
+        "thread = threading.Thread(target=run)\n",
+        "thread.start()\n",
+        "\n",
+        "time.sleep(5)\n",
+        "public_url = ngrok.connect(8501)\n",
+        "print(f\"🌐 Dashboard live at: {public_url}\")\n"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "iH3Bnzh0smwc",
+        "outputId": "f12be164-b3ef-4de0-8c28-ebd2bcc8eaf2"
+      },
+      "execution_count": 11,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "🌐 Dashboard live at: NgrokTunnel: \"https://02be3f2ece18.ngrok-free.app\" -> \"http://localhost:8501\"\n"
+          ]
+        }
+      ]
+    }
+  ]
+}
